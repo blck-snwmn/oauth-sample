@@ -13,6 +13,7 @@ type GoogleOauthClient struct {
 	clientID      string
 	clientSecret  string
 	scope         string
+	state         string
 	redirectURI   string
 	responseType  string
 	grantType     string
@@ -26,7 +27,8 @@ func (c GoogleOauthClient) GetValueForAuth() url.Values {
 		"scope":         {c.scope},
 		"response_type": {c.responseType},
 		"access_type":   {"offline"},
-		//sample のため state は指定しない
+		"state":         {c.state},
+		//sample のため nonce はなし
 	}
 }
 
@@ -70,8 +72,10 @@ func NewClient(
 		clientID:      clientID,
 		clientSecret:  clientSecret,
 		scope:         scope,
-		redirectURI:   redirectURI,
-		responseType:  "code",
-		grantType:     "authorization_code",
+		//sample のため固定文字列
+		state:        "security-value",
+		redirectURI:  redirectURI,
+		responseType: "code",
+		grantType:    "authorization_code",
 	}
 }
