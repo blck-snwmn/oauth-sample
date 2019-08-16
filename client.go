@@ -45,6 +45,23 @@ func (c GoogleOauthClient) GetValueForToken(code string) url.Values {
 
 // Exchange exchange an authorization code for an access token
 func (c GoogleOauthClient) Exchange(code string) (*Token, error) {
+	data, err := c.exchange(code)
+	if err != nil {
+		return nil, err
+	}
+	return ParseToken(data)
+}
+
+// ExchangeForOid exchange an authorization code for an access token
+func (c GoogleOauthClient) ExchangeForOid(code string) (*OidToken, error) {
+	data, err := c.exchange(code)
+	if err != nil {
+		return nil, err
+	}
+	return ParseOidToken(data)
+}
+
+func (c GoogleOauthClient) exchange(code string) ([]byte, error) {
 	v := c.GetValueForToken(code)
 
 	resp, err := http.PostForm(c.tokenEndoiint, v)
@@ -52,11 +69,7 @@ func (c GoogleOauthClient) Exchange(code string) (*Token, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseToken(data)
+	return ioutil.ReadAll(resp.Body)
 }
 
 // NewClient return GoogleOauthClient instance

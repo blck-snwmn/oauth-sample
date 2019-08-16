@@ -1,11 +1,13 @@
 package main
 
 import (
-	"io"
+	"encoding/base64"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 )
 
 func entryForOid(client GoogleOauthClient, w http.ResponseWriter, r *http.Request) {
@@ -27,17 +29,32 @@ func redirectPointForOid(client GoogleOauthClient, w http.ResponseWriter, r *htt
 		return
 	}
 	// ここでstateの検証が必要
-	v := client.GetValueForToken(code)
-
-	resp, err := http.PostForm(client.tokenEndoiint, v)
+	token, err := client.ExchangeForOid(code)
 	if err != nil {
 		log.Fatal(err)
-		return
 	}
-	defer resp.Body.Close()
+
+	log.Println(
+		token.AccessToken,
+		token.RefreshToken,
+		token.TokenType,
+		token.ExpiresIn,
+		token.IDToken,
+	)
 
 	w.WriteHeader(http.StatusOK)
-	io.Copy(w, resp.Body)
+
+	fmt.Fprintln(w, token.IDToken)
+
+	for _, tkn := range strings.Split(token.IDToken, ".") {
+		str, err := base64.RawURLEncoding.DecodeString(tkn)
+		if err != nil {
+			log.Println(err)
+		} else {
+			log.Println(string(str))
+			w.Write(str)
+		}
+	}
 }
 
 func oidSample() {
