@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -68,8 +68,15 @@ func (c GoogleOauthClient) exchange(code string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		_ = resp.Body.Close()
+		return nil, err
+	}
+	if err := resp.Body.Close(); err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 // NewClient return GoogleOauthClient instance

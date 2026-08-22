@@ -44,7 +44,14 @@ func TestSuccessCreatingJwt(t *testing.T) {
 // 実際のデータを利用したため、環境変数より取得
 // 処理イメージ（goolge の openId connect のみ想定）
 func TestVerifySignature(t *testing.T) {
-	jwt, err := NewDecodedJwt(os.Getenv("test_jwt"))
+	testJWT := os.Getenv("test_jwt")
+	testExponent := os.Getenv("test_exponent")
+	testModulus := os.Getenv("test_modulus")
+	if testJWT == "" || testExponent == "" || testModulus == "" {
+		t.Skip("signature test data is not configured")
+	}
+
+	jwt, err := NewDecodedJwt(testJWT)
 	if err != nil {
 		t.Error("create jwt fail")
 	}
@@ -56,8 +63,8 @@ func TestVerifySignature(t *testing.T) {
 	// https://accounts.google.com/.well-known/openid-configuration
 	// https://www.googleapis.com/oauth2/v3/certs
 	publicKey, err := NewPublicKey(
-		os.Getenv("test_exponent"),
-		os.Getenv("test_modulus"),
+		testExponent,
+		testModulus,
 	)
 	if err != nil {
 		t.Error("create public_key fail")

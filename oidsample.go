@@ -44,7 +44,10 @@ func redirectPointForOid(client GoogleOauthClient, w http.ResponseWriter, r *htt
 
 	w.WriteHeader(http.StatusOK)
 
-	fmt.Fprintln(w, token.IDToken)
+	if _, err := fmt.Fprintln(w, token.IDToken); err != nil {
+		log.Println(err)
+		return
+	}
 
 	for _, tkn := range strings.Split(token.IDToken, ".") {
 		str, err := base64.RawURLEncoding.DecodeString(tkn)
@@ -52,7 +55,10 @@ func redirectPointForOid(client GoogleOauthClient, w http.ResponseWriter, r *htt
 			log.Println(err)
 		} else {
 			log.Println(string(str))
-			w.Write(str)
+			if _, err := w.Write(str); err != nil {
+				log.Println(err)
+				return
+			}
 		}
 	}
 }
