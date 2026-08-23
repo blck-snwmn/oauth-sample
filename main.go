@@ -1,6 +1,11 @@
 package main
 
+import "os"
+
 func main() {
-	// oauthSample()
+	if len(os.Args) > 1 && os.Args[1] == "oauth" {
+		oauthSample()
+		return
+	}
 	oidSample()
 }
